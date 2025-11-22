@@ -1,19 +1,21 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { getAllTransactions } from "@/data-access/get-transactions"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-
 import TableCard from "@/components/table-component"
 import { ChartBarMultiple } from "@/components/bar-chart"
 
+import { getAllTransactions } from "@/data-access/get-transactions"
+import { getAllSuppliers } from "@/data-access/get-suppliers"
+
 export default async function Page() {
   const transactions = await getAllTransactions()
-
+  const suppliers = await getAllSuppliers()
+  
   return (
     <SidebarProvider
       style={
@@ -35,7 +37,7 @@ export default async function Page() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 lg:px-6">
                 <TableCard />
-                <ChartBarMultiple />
+                <ChartBarMultiple suppliers={suppliers} />
               </div>
             </div>
           </div>

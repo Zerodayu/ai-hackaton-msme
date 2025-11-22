@@ -38,11 +38,11 @@ const chartConfig = {
   },
   desktop: {
     label: "Total Amount",
-    color: "var(--primary)",
+    color: "var(--chart-3)",
   },
   mobile: {
     label: "Total Price",
-    color: "var(--secondary)",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig
 

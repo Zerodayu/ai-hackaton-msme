@@ -79,7 +79,7 @@ export default function TableCard() {
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>Name</TableHead>
-            <TableHead>Month</TableHead>
+            <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-center">Amount</TableHead>
           </TableRow>
