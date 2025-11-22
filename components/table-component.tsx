@@ -1,10 +1,10 @@
-
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -16,99 +16,143 @@ import {
 } from "@/components/ui/avatar"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import {
   Check,
-  CircleAlert
+  CircleAlert,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from "lucide-react"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination"
 
-const items = [
-  {
-    id: "1",
-    name: "Alex Thompson",
-    month: "January",
-    status: "Incoming",
-    amount: "312",
-  },
-  {
-    id: "2",
-    name: "Sarah Chen",
-    month: "February",
-    status: "Delivered",
-    amount: "600",
-  },
-  {
-    id: "3",
-    name: "James Wilson",
-    month: "March",
-    status: "Delivered",
-    amount: "650",
-  },
-  {
-    id: "4",
-    name: "Maria Garcia",
-    month: "April",
-    status: "Delivered",
-    amount: "500",
-  },
-  {
-    id: "5",
-    name: "David Kim",
-    month: "May",
-    status: "Delivered",
-    amount: "450",
-  },
-]
+import { getAllTransactions } from "@/data-access/get-transactions"
 
-export default function TableCard() {
+export default async function TableCard() {
+  const transactions = await getAllTransactions()
+
+  const averageAmount = transactions.length > 0
+    ? Math.round(transactions.reduce((sum, t) => sum + t.amount, 0) / transactions.length)
+    : 0
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Average Supply</CardTitle>
+        <CardTitle>Transaction Logs</CardTitle>
         <CardDescription>
-          Average supply: 450
+          Average amount: {averageAmount}
         </CardDescription>
       </CardHeader>
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead>Name</TableHead>
+            <TableHead>Supplier Name</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-center">Amount</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
+          {transactions.map((transaction) => (
+            <TableRow key={transaction.transaction_id}>
               <TableCell className="flex items-center gap-2 font-medium">
                 <Avatar>
-                  <AvatarImage src="" alt={item.name} />
-                  <AvatarFallback>{item.id}</AvatarFallback>
+                  <AvatarImage src="" alt={transaction.supplier.name} />
+                  <AvatarFallback>
+                    {transaction.supplier.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                {item.name}
+                {transaction.supplier.name}
               </TableCell>
-              <TableCell>{item.month}</TableCell>
               <TableCell>
-                <Badge variant={item.status === "Delivered" ? "outline" : "default"}>
-                  {item.status === "Delivered" ? <Check /> : <CircleAlert />}
-                  {item.status}
+                {new Date(transaction.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </TableCell>
+              <TableCell>
+                <Badge variant={transaction.status === "rejected" ? "outline" : "default"}>
+                  {transaction.status === "completed" ? <Check /> : <CircleAlert />}
+                  {transaction.status}
                 </Badge>
               </TableCell>
-              <TableCell className="text-center">{item.amount}</TableCell>
+              <TableCell className="text-center">{transaction.amount}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
       <p className="mt-4 text-center text-sm text-muted-foreground">
-        Basic table
+        Transaction history
       </p>
     </Card>
+  )
+}
+
+
+type PaginationProps = {
+  currentPage: number
+  totalPages: number
+}
+
+ function PaginationSection({
+  currentPage,
+  totalPages,
+}: PaginationProps) {
+  return (
+    <Pagination>
+      <PaginationContent className="w-full justify-between">
+        <PaginationItem>
+          <PaginationLink
+            className={cn(
+              "aria-disabled:pointer-events-none aria-disabled:opacity-50",
+              buttonVariants({
+                variant: "outline",
+              })
+            )}
+            href={currentPage === 1 ? undefined : `#/page/${currentPage - 1}`}
+            aria-label="Go to previous page"
+            aria-disabled={currentPage === 1 ? true : undefined}
+            role={currentPage === 1 ? "link" : undefined}
+          >
+            <ChevronLeftIcon size={16} aria-hidden="true" />
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            Page <span className="text-foreground">{currentPage}</span> of{" "}
+            <span className="text-foreground">{totalPages}</span>
+          </p>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            className={cn(
+              "aria-disabled:pointer-events-none aria-disabled:opacity-50",
+              buttonVariants({
+                variant: "outline",
+              })
+            )}
+            href={
+              currentPage === totalPages
+                ? undefined
+                : `#/page/${currentPage + 1}`
+            }
+            aria-label="Go to next page"
+            aria-disabled={currentPage === totalPages ? true : undefined}
+            role={currentPage === totalPages ? "link" : undefined}
+          >
+            <ChevronRightIcon size={16} aria-hidden="true" />
+          </PaginationLink>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   )
 }

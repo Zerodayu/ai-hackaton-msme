@@ -18,6 +18,43 @@ export async function getAllTransactions() {
   }
 }
 
+export async function getPaginatedTransactions(page: number = 1, pageSize: number = 10) {
+  try {
+    const skip = (page - 1) * pageSize;
+
+    const [transactions, totalCount] = await Promise.all([
+      prisma.transactions.findMany({
+        include: {
+          supplier: true,
+        },
+        orderBy: {
+          date: 'desc',
+        },
+        skip,
+        take: pageSize,
+      }),
+      prisma.transactions.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      transactions,
+      pagination: {
+        currentPage: page,
+        pageSize,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching paginated transactions:', error);
+    throw error;
+  }
+}
+
 export async function getTransactionById(transactionId: string) {
   try {
     const transaction = await prisma.transactions.findUnique({
