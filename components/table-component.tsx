@@ -87,13 +87,13 @@ export default function TableCard() {
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id}>
-              <span className="flex items-center pl-4">
+              <TableCell className="flex items-center gap-2 font-medium">
                 <Avatar>
                   <AvatarImage src="" alt={item.name} />
                   <AvatarFallback>{item.id}</AvatarFallback>
                 </Avatar>
-                <TableCell className="font-medium">{item.name}</TableCell>
-              </span>
+                {item.name}
+              </TableCell>
               <TableCell>{item.month}</TableCell>
               <TableCell>
                 <Badge variant={item.status === "Delivered" ? "outline" : "default"}>
