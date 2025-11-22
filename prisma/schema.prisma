@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Suppliers {
+  supplier_id       String @id @default(cuid())
+  name              String
+  location          String
+  eligibility       Json
+  description       Json
+  reliability_score Int
+
+  transactions Transactions[]
+}
+
+model Transactions {
+  transaction_id String   @id @default(cuid())
+  supplier_id    String
+  amount         Int
+  price          Float
+  date           DateTime @default(now())
+  quality        Json
+  status         String
+
+  supplier Suppliers @relation(fields: [supplier_id], references: [supplier_id])
+}
