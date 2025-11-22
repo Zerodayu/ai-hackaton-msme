@@ -13,7 +13,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Suppliers {
+model suppliers {
   supplier_id       String @id @default(cuid())
   name              String
   location          String
@@ -21,11 +21,11 @@ model Suppliers {
   description       Json
   reliability_score Int
 
-  transactions   Transactions[]
-  productionLogs Production_logs[]
+  transactions   transactions[]
+  productionLogs production_logs[]
 }
 
-model Transactions {
+model transactions {
   transaction_id String   @id @default(cuid())
   supplier_id    String
   amount         Int
@@ -34,15 +34,15 @@ model Transactions {
   quality        Json
   status         String
 
-  supplier Suppliers @relation(fields: [supplier_id], references: [supplier_id])
+  supplier suppliers @relation(fields: [supplier_id], references: [supplier_id])
 }
 
-model Production_logs {
+model production_logs {
   log_id       String   @id @default(cuid())
   date         DateTime @default(now())
   product_type String
   quantity     Int
   supplier_id  String
 
-  supplier Suppliers @relation(fields: [supplier_id], references: [supplier_id])
+  supplier suppliers @relation(fields: [supplier_id], references: [supplier_id])
 }
