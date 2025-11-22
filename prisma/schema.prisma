@@ -21,7 +21,8 @@ model Suppliers {
   description       Json
   reliability_score Int
 
-  transactions Transactions[]
+  transactions   Transactions[]
+  productionLogs Production_logs[]
 }
 
 model Transactions {
@@ -32,6 +33,16 @@ model Transactions {
   date           DateTime @default(now())
   quality        Json
   status         String
+
+  supplier Suppliers @relation(fields: [supplier_id], references: [supplier_id])
+}
+
+model Production_logs {
+  log_id       String   @id @default(cuid())
+  date         DateTime @default(now())
+  product_type String
+  quantity     Int
+  supplier_id  String
 
   supplier Suppliers @relation(fields: [supplier_id], references: [supplier_id])
 }
