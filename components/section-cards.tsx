@@ -17,6 +17,7 @@ import {
   Sparkles
 } from "lucide-react"
 import { useDataRefresh } from "@/hooks/DataRefreshWrap"
+import { cn } from "@/lib/utils"
 
 interface SuggestionData {
   status: string
@@ -134,7 +135,13 @@ export function SectionCards() {
             <Sparkles size={16} className="text-primary"/>
             Suggested Estimated Supply
           </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+          <CardTitle
+            className={cn(
+              "text-2xl font-semibold tabular-nums @[250px]/card:text-3xl",
+              suggestion?.status === "CRITICAL_ORDERING_REQUIRED" &&
+                "text-destructive"
+            )}
+          >
             {suggestion
               ? `${suggestion.analysis.required_purchase_kg} kg`
               : "Loading..."}
@@ -147,7 +154,13 @@ export function SectionCards() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
+          <div
+            className={cn(
+              "line-clamp-1 flex gap-2 font-medium",
+              suggestion?.status === "CRITICAL_ORDERING_REQUIRED" &&
+                "text-destructive"
+            )}
+          >
             {suggestion ? (
               <>
                 {suggestion.status} <IconTrendingUp className="size-4" />
