@@ -1,0 +1,1 @@
+[{"transaction_id":"TXN-FIXED-0","supplier_id":"SUP-DVO-001","amount":518,"price":125,"date":"2025-05-27 09:27:11.06","quality":{"cut_test_results":{"moldy_percent":1,"insect_damaged_percent":0.5},"moisture_content":7},"status":"completed"}]
