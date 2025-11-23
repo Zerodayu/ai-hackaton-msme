@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
+import { revalidatePath } from "next/cache"
 import {
   SidebarInset,
   SidebarProvider,

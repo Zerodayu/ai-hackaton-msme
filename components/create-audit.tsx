@@ -37,7 +37,7 @@ import {
   ChevronDownIcon,
   PhilippinePeso,
 } from "lucide-react"
-import { createTransaction } from "@/data-access/post-transaction"
+import { createTransactionAction } from "@/actions/create-transaction"
 import { getAllSuppliers } from "@/data-access/get-suppliers"
 
 
@@ -72,7 +72,7 @@ export default function CreateAuditBtn() {
 
     setIsLoading(true)
     try {
-      const result = await createTransaction({
+      const result = await createTransactionAction({
         supplier_id: selectedSupplier,
         amount: parseInt(amount),
         price: parseFloat(price),
@@ -85,17 +85,21 @@ export default function CreateAuditBtn() {
         },
       })
 
-      console.log("Success: Transaction created successfully", result)
-      console.log(`Added ${amount} units at ₱${price}`)
+      if (result.success) {
+        console.log("Success: Transaction created successfully", result.data)
+        console.log(`Added ${amount} units at ₱${price}`)
 
-      // Reset form
-      setSelectedSupplier("")
-      setAmount("")
-      setPrice("")
-      setMoist([25])
-      setMold([25])
-      setInsect([25])
-      setOpen(false)
+        // Reset form
+        setSelectedSupplier("")
+        setAmount("")
+        setPrice("")
+        setMoist([25])
+        setMold([25])
+        setInsect([25])
+        setOpen(false)
+      } else {
+        console.error("Error: Failed to create transaction", result.error)
+      }
     } catch (error) {
       console.error("Error: Failed to create transaction", error)
     } finally {
