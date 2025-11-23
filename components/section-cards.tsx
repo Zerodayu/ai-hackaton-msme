@@ -1,5 +1,9 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
+"use client"
 
+import { useEffect, useState } from "react"
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
+import { suggestOrder } from "@/api/suggest-order"
+import { getAllTransactions } from "@/data-access/get-transactions"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -9,8 +13,59 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Sparkles
+} from "lucide-react"
+
+interface SuggestionData {
+  status: string
+  message: string
+  analysis: {
+    current_storage: number
+    predicted_usage_spike: number
+    required_purchase_kg: number
+  }
+  ai_suggestion: {
+    supplier: string
+    rank_score: number
+    suggested_order_kg: number
+    reason: string
+  }[]
+}
 
 export function SectionCards() {
+  const [suggestion, setSuggestion] = useState<SuggestionData | null>(null)
+  const [averageTransactionAmount, setAverageTransactionAmount] = useState<
+    number | null
+  >(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [suggestionData, transactionsData] = await Promise.all([
+          suggestOrder(),
+          getAllTransactions(),
+        ])
+
+        setSuggestion(suggestionData)
+
+        if (transactionsData && transactionsData.length > 0) {
+          const totalAmount = transactionsData.reduce(
+            (sum, t) => sum + t.amount,
+            0
+          )
+          setAverageTransactionAmount(totalAmount / transactionsData.length)
+        } else {
+          setAverageTransactionAmount(0)
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card">
@@ -39,7 +94,11 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Average Requests</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            1,234
+            {averageTransactionAmount !== null
+              ? `${averageTransactionAmount.toLocaleString(undefined, {
+                  maximumFractionDigits: 0,
+                })} kg`
+              : "Loading..."}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -59,9 +118,14 @@ export function SectionCards() {
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Suggested Estimated Supply</CardDescription>
+          <CardDescription className="flex items-center gap-2">
+            <Sparkles size={16}/>
+            Suggested Estimated Supply
+          </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            45,678
+            {suggestion
+              ? `${suggestion.analysis.required_purchase_kg.toLocaleString()} kg`
+              : "Loading..."}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -72,16 +136,26 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <IconTrendingUp className="size-4" />
+            {suggestion ? (
+              <>
+                {suggestion.status} <IconTrendingUp className="size-4" />
+              </>
+            ) : (
+              "Loading..."
+            )}
           </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
+          <div className="text-muted-foreground">
+            {suggestion ? suggestion.message : "..."}
+          </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Supply Available</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            1321
+            {suggestion
+              ? `${suggestion.analysis.current_storage.toLocaleString()} kg`
+              : "Loading..."}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
