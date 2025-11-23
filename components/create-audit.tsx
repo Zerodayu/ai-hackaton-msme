@@ -39,9 +39,11 @@ import {
 } from "lucide-react"
 import { createTransactionAction } from "@/actions/create-transaction"
 import { getAllSuppliers } from "@/data-access/get-suppliers"
+import { useDataRefresh } from "@/hooks/DataRefreshWrap"
 
 
 export default function CreateAuditBtn() {
+  const { triggerRefresh } = useDataRefresh()
   const [selectedSupplier, setSelectedSupplier] = useState<string>("")
   const [amount, setAmount] = useState<string>("")
   const [price, setPrice] = useState<string>("")
@@ -97,6 +99,7 @@ export default function CreateAuditBtn() {
         setMold([25])
         setInsect([25])
         setOpen(false)
+        triggerRefresh()
       } else {
         console.error("Error: Failed to create transaction", result.error)
       }
