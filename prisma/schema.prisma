@@ -16,7 +16,7 @@ datasource db {
 model suppliers {
   supplier_id       String @id @default(cuid())
   name              String
-  location          String
+  location          Json
   eligibility       Json
   description       Json
   reliability_score Int
