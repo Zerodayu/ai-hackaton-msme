@@ -32,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
 
 const data = {
   user: {
@@ -46,25 +47,26 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Supply Chain",
       url: "#",
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
+      title: "Market Analytics",
       url: "#",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Audit Reports",
       url: "#",
       icon: IconFolder,
     },
-    {
-      title: "Team",
+      { 
+      title: "Inventory Monitoring",
       url: "#",
-      icon: IconUsers,
+      icon: IconReport,
     },
+  
   ],
   navClouds: [
     {
@@ -91,7 +93,7 @@ const data = {
         {
           title: "Active Proposals",
           url: "#",
-        },
+        },  
         {
           title: "Archived",
           url: "#",
@@ -140,11 +142,6 @@ const data = {
     {
       name: "Reports",
       url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
       icon: IconFileWord,
     },
   ],
@@ -161,7 +158,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+                {/* <IconInnerShadowTop className="!size-5" /> */}
+                <Image src={"cacao-logo.svg"} width={24} height={24} alt=""/>
                 <span className="text-base font-semibold">AGRILYTICS</span>
               </a>
             </SidebarMenuButton>
