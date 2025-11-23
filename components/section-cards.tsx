@@ -38,6 +38,9 @@ export function SectionCards() {
   const [averageTransactionAmount, setAverageTransactionAmount] = useState<
     number | null
   >(null)
+  const [totalTransactionAmount, setTotalTransactionAmount] = useState<
+    number | null
+  >(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,8 +58,10 @@ export function SectionCards() {
             0
           )
           setAverageTransactionAmount(totalAmount / transactionsData.length)
+          setTotalTransactionAmount(totalAmount)
         } else {
           setAverageTransactionAmount(0)
+          setTotalTransactionAmount(0)
         }
       } catch (error) {
         console.error("Failed to fetch data:", error)
@@ -72,7 +77,12 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Total Supplies</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
+            {totalTransactionAmount !== null
+              ? `${totalTransactionAmount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} kg`
+              : "Loading..."}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -119,12 +129,12 @@ export function SectionCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription className="flex items-center gap-2">
-            <Sparkles size={16}/>
+            <Sparkles size={16} className="text-primary"/>
             Suggested Estimated Supply
           </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {suggestion
-              ? `${suggestion.analysis.required_purchase_kg.toLocaleString()} kg`
+              ? `${suggestion.analysis.required_purchase_kg} kg`
               : "Loading..."}
           </CardTitle>
           <CardAction>
