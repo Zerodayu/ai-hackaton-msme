@@ -1,5 +1,9 @@
-import { prisma } from '@/lib/prismadb'
+"use server"
 
+import { prisma } from '@/lib/prismadb'
+import { updateScore } from '@/api/update-score'
+
+// /update-scores - post
 export async function createTransaction(data: {
   supplier_id: string
   amount: number
@@ -14,7 +18,7 @@ export async function createTransaction(data: {
   }
   status?: string
 }) {
-  return await prisma.transactions.create({
+  const transaction = await prisma.transactions.create({
     data: {
       supplier_id: data.supplier_id,
       amount: data.amount,
@@ -24,4 +28,18 @@ export async function createTransaction(data: {
       status: data.status || 'completed',
     },
   })
+
+  // Update score after successful transaction creation
+  try {
+    console.log('Calling updateScore API...')
+    const result = await updateScore()
+    
+    if (result?.status === 'success') {
+      console.log('Update Score msg:', result.message)
+    }
+  } catch (error) {
+    console.error('Failed to update score:', error)
+  }
+
+  return transaction
 }

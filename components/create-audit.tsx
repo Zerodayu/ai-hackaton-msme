@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { IconCirclePlusFilled } from "@tabler/icons-react"
-import { useId, useState } from "react"
+import { useId, useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
@@ -36,15 +36,75 @@ import {
   CheckIcon,
   ChevronDownIcon,
   PhilippinePeso,
-  Droplet,
-  Apple,
-  HeartMinus
 } from "lucide-react"
+import { createTransaction } from "@/data-access/post-transaction"
+import { getAllSuppliers } from "@/data-access/get-suppliers"
 
 
 export default function CreateAuditBtn() {
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("")
+  const [amount, setAmount] = useState<string>("")
+  const [price, setPrice] = useState<string>("")
+  const [moist, setMoist] = useState([25])
+  const [mold, setMold] = useState([25])
+  const [insect, setInsect] = useState([25])
+  const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [suppliers, setSuppliers] = useState<Array<{ supplier_id: string; name: string }>>([])
+
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const data = await getAllSuppliers()
+        setSuppliers(data.map(s => ({ supplier_id: s.supplier_id, name: s.name })))
+      } catch (error) {
+        console.error("Error fetching suppliers:", error)
+      }
+    }
+    fetchSuppliers()
+  }, [])
+
+  const handleSubmit = async () => {
+    if (!selectedSupplier || !amount || !price) {
+      console.log("Error: Missing required fields - Please fill in supplier, amount, and price")
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const result = await createTransaction({
+        supplier_id: selectedSupplier,
+        amount: parseInt(amount),
+        price: parseFloat(price),
+        quality: {
+          moisture_content: moist[0],
+          cut_test_results: {
+            moldy_percent: mold[0],
+            insect_damaged_percent: insect[0],
+          },
+        },
+      })
+
+      console.log("Success: Transaction created successfully", result)
+      console.log(`Added ${amount} units at ₱${price}`)
+
+      // Reset form
+      setSelectedSupplier("")
+      setAmount("")
+      setPrice("")
+      setMoist([25])
+      setMold([25])
+      setInsect([25])
+      setOpen(false)
+    } catch (error) {
+      console.error("Error: Failed to create transaction", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size="sm" className="flex-1">
           <IconCirclePlusFilled />
@@ -58,90 +118,48 @@ export default function CreateAuditBtn() {
             Enter Transaction Details Below
           </AlertDialogDescription>
           <div className="flex flex-col gap-2 py-4">
-            <SelectInput />
-            <AmountInput />
+            <SupplierInput 
+              value={selectedSupplier} 
+              onChange={setSelectedSupplier}
+              suppliers={suppliers}
+            />
+            <TransactionInput 
+              amount={amount}
+              price={price}
+              moist={moist}
+              mold={mold}
+              insect={insect}
+              onAmountChange={setAmount}
+              onPriceChange={setPrice}
+              onMoistChange={setMoist}
+              onMoldChange={setMold}
+              onInsectChange={setInsect}
+            />
           </div>
 
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Confirm</AlertDialogAction>
+          <AlertDialogAction onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? "Creating..." : "Confirm"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   )
 }
 
-function SelectInput() {
-  const frameworks = [
-    {
-      value: "next.js",
-      label: "Next.js",
-    },
-    {
-      value: "sveltekit",
-      label: "SvelteKit",
-    },
-    {
-      value: "nuxt.js",
-      label: "Nuxt.js",
-    },
-    {
-      value: "remix",
-      label: "Remix",
-    },
-    {
-      value: "astro",
-      label: "Astro",
-    },
-    {
-      value: "angular",
-      label: "Angular",
-    },
-    {
-      value: "vue",
-      label: "Vue.js",
-    },
-    {
-      value: "react",
-      label: "React",
-    },
-    {
-      value: "ember",
-      label: "Ember.js",
-    },
-    {
-      value: "gatsby",
-      label: "Gatsby",
-    },
-    {
-      value: "eleventy",
-      label: "Eleventy",
-    },
-    {
-      value: "solid",
-      label: "SolidJS",
-    },
-    {
-      value: "preact",
-      label: "Preact",
-    },
-    {
-      value: "qwik",
-      label: "Qwik",
-    },
-    {
-      value: "alpine",
-      label: "Alpine.js",
-    },
-    {
-      value: "lit",
-      label: "Lit",
-    },
-  ]
+function SupplierInput({ 
+  value, 
+  onChange, 
+  suppliers 
+}: { 
+  value: string
+  onChange: (value: string) => void
+  suppliers: Array<{ supplier_id: string; name: string }>
+}) {
   const id = useId()
   const [open, setOpen] = useState<boolean>(false)
-  const [value, setValue] = useState<string>("")
 
   return (
     <div className="flex-1 *:not-first:mt-2 py-4">
@@ -157,9 +175,8 @@ function SelectInput() {
           >
             <span className={cn("truncate", !value && "text-muted-foreground")}>
               {value
-                ? frameworks.find((framework) => framework.value === value)
-                  ?.label
-                : "Select framework"}
+                ? suppliers.find((supplier) => supplier.supplier_id === value)?.name
+                : "Select supplier"}
             </span>
             <ChevronDownIcon
               size={16}
@@ -173,21 +190,21 @@ function SelectInput() {
           align="start"
         >
           <Command>
-            <CommandInput placeholder="Search framework..." />
+            <CommandInput placeholder="Search supplier..." />
             <CommandList>
-              <CommandEmpty>No framework found.</CommandEmpty>
+              <CommandEmpty>No supplier found.</CommandEmpty>
               <CommandGroup>
-                {frameworks.map((framework) => (
+                {suppliers.map((supplier) => (
                   <CommandItem
-                    key={framework.value}
-                    value={framework.value}
-                    onSelect={(currentValue) => {
-                      setValue(currentValue === value ? "" : currentValue)
+                    key={supplier.supplier_id}
+                    value={supplier.name}
+                    onSelect={() => {
+                      onChange(supplier.supplier_id)
                       setOpen(false)
                     }}
                   >
-                    {framework.label}
-                    {value === framework.value && (
+                    {supplier.name}
+                    {value === supplier.supplier_id && (
                       <CheckIcon size={16} className="ml-auto" />
                     )}
                   </CommandItem>
@@ -201,11 +218,30 @@ function SelectInput() {
   )
 }
 
-function AmountInput() {
+function TransactionInput({
+  amount,
+  price,
+  moist,
+  mold,
+  insect,
+  onAmountChange,
+  onPriceChange,
+  onMoistChange,
+  onMoldChange,
+  onInsectChange,
+}: {
+  amount: string
+  price: string
+  moist: number[]
+  mold: number[]
+  insect: number[]
+  onAmountChange: (value: string) => void
+  onPriceChange: (value: string) => void
+  onMoistChange: (value: number[]) => void
+  onMoldChange: (value: number[]) => void
+  onInsectChange: (value: number[]) => void
+}) {
   const id = useId()
-  const [moist, setMoist] = useState([25])
-  const [mold, setMold] = useState([25])
-  const [insect, setInsect] = useState([25])
 
   return (
     <div className="space-y-4">
@@ -213,7 +249,14 @@ function AmountInput() {
         <div className="w-content *:not-first:mt-2">
           <Label htmlFor={id}>Enter Amount</Label>
           <div className="relative">
-            <Input id={id} className="peer ps-9" placeholder="1123" type="number" />
+            <Input 
+              id={id} 
+              className="peer ps-9" 
+              placeholder="1123" 
+              type="number" 
+              value={amount}
+              onChange={(e) => onAmountChange(e.target.value)}
+            />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
               <ChartPie size={16} aria-hidden="true" />
             </div>
@@ -222,7 +265,14 @@ function AmountInput() {
         <div className="w-content *:not-first:mt-2">
           <Label htmlFor={id}>Enter Price</Label>
           <div className="relative">
-            <Input id={id} className="peer ps-9" placeholder="1123" type="number" />
+            <Input 
+              id={id} 
+              className="peer ps-9" 
+              placeholder="1123" 
+              type="number"
+              value={price}
+              onChange={(e) => onPriceChange(e.target.value)}
+            />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
               <PhilippinePeso size={16} aria-hidden="true" />
             </div>
@@ -232,7 +282,7 @@ function AmountInput() {
 
       <div className="gap-4 py-4">
         <span className="flex">
-          <Label>Moisture Content: {moist}</Label>
+          <Label>Moisture Content: {moist[0]}%</Label>
         </span>
         <div>
           <span
@@ -244,7 +294,7 @@ function AmountInput() {
           </span>
           <Slider
             value={moist}
-            onValueChange={setMoist}
+            onValueChange={onMoistChange}
             aria-label="Slider with output"
           />
         </div>
@@ -252,7 +302,7 @@ function AmountInput() {
 
       <div className="gap-4 py-4">
         <span className="flex">
-          <Label>Moldy Percentage: {mold}</Label>
+          <Label>Moldy Percentage: {mold[0]}%</Label>
         </span>
         <div>
           <span
@@ -264,7 +314,7 @@ function AmountInput() {
           </span>
           <Slider
             value={mold}
-            onValueChange={setMold}
+            onValueChange={onMoldChange}
             aria-label="Slider with output"
           />
         </div>
@@ -272,7 +322,7 @@ function AmountInput() {
 
       <div className="gap-4 py-4">
         <span className="flex">
-          <Label>Insect Damage Percentage: {insect}</Label>
+          <Label>Insect Damage Percentage: {insect[0]}%</Label>
         </span>
         <div>
           <span
@@ -284,7 +334,7 @@ function AmountInput() {
           </span>
           <Slider
             value={insect}
-            onValueChange={setInsect}
+            onValueChange={onInsectChange}
             aria-label="Slider with output"
           />
         </div>
