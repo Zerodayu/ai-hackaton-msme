@@ -16,6 +16,7 @@ import {
 import {
   Sparkles
 } from "lucide-react"
+import { useDataRefresh } from "@/hooks/DataRefreshWrap"
 
 interface SuggestionData {
   status: string
@@ -34,6 +35,7 @@ interface SuggestionData {
 }
 
 export function SectionCards() {
+  const { refreshKey } = useDataRefresh()
   const [suggestion, setSuggestion] = useState<SuggestionData | null>(null)
   const [averageTransactionAmount, setAverageTransactionAmount] = useState<
     number | null
@@ -69,7 +71,7 @@ export function SectionCards() {
     }
 
     fetchData()
-  }, [])
+  }, [refreshKey])
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
