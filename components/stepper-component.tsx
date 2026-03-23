@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Stepper,
@@ -9,48 +9,48 @@ import {
   StepperPanel,
   StepperTitle,
   StepperTrigger,
-} from "@/components/reui/stepper";
+} from "@/components/reui/stepper"
 
-const steps = [
-  { title: "User Details" },
-  { title: "Payment Info" },
-  { title: "Auth OTP" },
-  { title: "Preview Form" },
-];
+type Step = { title: string; content: React.ReactNode }
 
-export function Pattern() {
+interface PatternProps {
+  steps: Step[]
+  value?: number
+  defaultValue?: number
+  onValueChange?: (step: number) => void
+}
+
+export function Pattern({ steps, value, defaultValue = 1, onValueChange }: PatternProps) {
   return (
-    <Stepper defaultValue={2} className="w-full max-w-lg space-y-8">
-      <StepperNav className="mb-10 gap-5">
+    <Stepper
+      value={value}
+      defaultValue={value ? undefined : defaultValue}
+      onValueChange={onValueChange}
+      className="w-full space-y-8"
+    >
+      <StepperNav className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((step, index) => (
-          <StepperItem
-            key={index}
-            step={index + 1}
-            className="relative flex-1 items-start"
-          >
-            <StepperTrigger className="flex grow flex-col items-start justify-center gap-3.5">
-              <StepperIndicator className="bg-border data-[state=active]:bg-primary data-[state=completed]:bg-primary h-1 w-full rounded-full">
-                <span className="sr-only">{index + 1}</span>
-              </StepperIndicator>
-              <StepperTitle className="group-data-[state=inactive]/step:text-muted-foreground text-start font-semibold">
-                {step.title}
-              </StepperTitle>
+          <StepperItem key={step.title} step={index + 1}>
+            <StepperTrigger className="flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left">
+              <StepperIndicator>{index + 1}</StepperIndicator>
+              <div className="flex flex-col">
+                <StepperTitle className="text-sm font-semibold">
+                  {step.title}
+                </StepperTitle>
+                <span className="text-xs text-muted-foreground">Step {index + 1} of {steps.length}</span>
+              </div>
             </StepperTrigger>
           </StepperItem>
         ))}
       </StepperNav>
 
-      <StepperPanel className="text-sm">
+      <StepperPanel className="space-y-6">
         {steps.map((step, index) => (
-          <StepperContent
-            key={index}
-            value={index + 1}
-            className="flex items-center justify-center"
-          >
-            {step.title} content
+          <StepperContent key={step.title} value={index + 1}>
+            {step.content}
           </StepperContent>
         ))}
       </StepperPanel>
     </Stepper>
-  );
+  )
 }

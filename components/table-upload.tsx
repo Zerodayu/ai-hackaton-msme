@@ -49,6 +49,7 @@ interface TableUploadProps {
   className?: string;
   onFilesChange?: (files: FileWithPreview[]) => void;
   simulateUpload?: boolean;
+  showDefaults?: boolean;
 }
 
 export function Pattern({
@@ -59,38 +60,41 @@ export function Pattern({
   className,
   onFilesChange,
   simulateUpload = true,
+  showDefaults = false,
 }: TableUploadProps) {
   // Create default files using FileMetadata type
-  const defaultFiles: FileMetadata[] = [
-    {
-      id: "default-doc-1",
-      name: "document.pdf",
-      size: 529254,
-      type: "application/pdf",
-      url: "/media/files/document.pdf",
-    },
-    {
-      id: "default-doc-2",
-      name: "intro.zip",
-      size: 252846,
-      type: "application/zip",
-      url: "/media/files/intro.zip",
-    },
-    {
-      id: "default-doc-3",
-      name: "conclusion.xlsx",
-      size: 353126,
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      url: "/media/files/conclusion.xlsx",
-    },
-    {
-      id: "default-doc-4",
-      name: "package.json",
-      size: 697,
-      type: "application/json",
-      url: "/media/files/package.json",
-    },
-  ];
+  const defaultFiles: FileMetadata[] = showDefaults
+    ? [
+        {
+          id: "default-doc-1",
+          name: "document.pdf",
+          size: 529254,
+          type: "application/pdf",
+          url: "/media/files/document.pdf",
+        },
+        {
+          id: "default-doc-2",
+          name: "intro.zip",
+          size: 252846,
+          type: "application/zip",
+          url: "/media/files/intro.zip",
+        },
+        {
+          id: "default-doc-3",
+          name: "conclusion.xlsx",
+          size: 353126,
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          url: "/media/files/conclusion.xlsx",
+        },
+        {
+          id: "default-doc-4",
+          name: "package.json",
+          size: 697,
+          type: "application/json",
+          url: "/media/files/package.json",
+        },
+      ]
+    : [];
 
   // Convert default files to FileUploadItem format
   const defaultUploadFiles: FileUploadItem[] = defaultFiles.map((file) => ({
@@ -135,17 +139,20 @@ export function Pattern({
         );
 
         if (existingFile) {
-          // Preserve existing file status and progress
           return {
             ...existingFile,
-            ...file, // Update any changed properties from the file
+            ...file,
+            ...(simulateUpload
+              ? {}
+              : { status: "completed" as const, progress: 100 }),
           };
         } else {
-          // New file - set to uploading
           return {
             ...file,
-            progress: 0,
-            status: "uploading" as const,
+            progress: simulateUpload ? 0 : 100,
+            status: simulateUpload
+              ? ("uploading" as const)
+              : ("completed" as const),
           };
         }
       });
