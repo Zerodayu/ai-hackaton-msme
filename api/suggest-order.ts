@@ -1,15 +1,13 @@
-"use server"
+"use server";
 
-import axios from 'axios';
-
-const API_BASE_URL = 'https://uneuphonic-kina-disturbedly.ngrok-free.dev';
+import { instance } from "@/lib/axios";
 
 export const suggestOrder = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/suggest-orders-smart`);
+    const response = await instance.get("/api/v1/inventory/suggest-orders");
     return response.data;
   } catch (error) {
-    console.error('Error updating score:', error);
+    console.error("Error updating score:", error);
     throw error;
   }
 };
